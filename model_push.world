@@ -12,6 +12,7 @@
     </include>
 
     <model name="box">
+      <gravity>0</gravity>
       <pose>0 0 0.5 0 0 0</pose>
       <link name="link">
         <collision name="collision">
@@ -20,6 +21,15 @@
               <size>1 1 1</size>
             </box>
           </geometry>
+
+          <surface>
+            <friction>
+              <ode>
+                <mu>0.00</mu>
+                <mu2>0.00</mu2>
+              </ode>
+            </friction>
+          </surface>
         </collision>
 
         <visual name="visual">
