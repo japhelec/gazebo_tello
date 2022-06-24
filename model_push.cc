@@ -25,7 +25,7 @@ namespace gazebo
     public: void OnUpdate()
     {
       // Apply a small linear velocity to the model.
-      this->vel += 0.0001;
+      this->vel = (1.7-this->vel)/1.3*0.001 + this->vel;
       this->model->SetLinearVel(ignition::math::Vector3d(this->vel, 0, 0));
     }
 
