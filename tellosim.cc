@@ -28,6 +28,9 @@ namespace gazebo
       this->d_tv[1] = 0;
       this->d_tv[2] = 0;
 
+      this->rv = 0;
+      this->d_rv = 0;
+
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
@@ -63,7 +66,7 @@ namespace gazebo
     // Called by the world update start event
     public: void OnUpdate()
     {
-      // Apply a small linear velocity to the model.
+      // Update Linear velocity
       double* p_d_tv = this->d_tv;
       double* p_tv = this->tv;
       double tmp[3];
@@ -78,8 +81,12 @@ namespace gazebo
       this->tv[1] = tmp[1];
       this->tv[2] = tmp[2];
 
+      // Update Angular velocity
+      this->rv = (this->d_rv-this->rv)/0.1*0.001 + this->rv;
+
       // this->vel = (this->d_vel-this->vel)/1.3*0.001 + this->vel;
       this->model->SetLinearVel(ignition::math::Vector3d(tmp[0], tmp[1], tmp[2]));
+      this->model->SetAngularVel(ignition::math::Vector3d(0, 0, this->rv));
     }
 
     // Handle an incoming message from ROS
@@ -91,6 +98,8 @@ namespace gazebo
       this->d_tv[0] = 0.017*_msg->linear.x;
       this->d_tv[1] = 0.017*_msg->linear.y;
       this->d_tv[2] = 0.008*_msg->linear.z;
+
+      this->d_rv = 0.0143*_msg->angular.z;
     }
 
     // ROS helper function that processes messages
@@ -116,6 +125,12 @@ namespace gazebo
 
     // pointer to the desired velocity
     private: double d_tv[3];
+
+    // pointer to the current rotational velocity
+    private: double rv;
+
+    // pointer to the desired rotational velocity
+    private: double d_rv;
 
     // A node use for ROS transport
     private: std::unique_ptr<ros::NodeHandle> rosNode;
