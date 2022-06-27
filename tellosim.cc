@@ -1,3 +1,4 @@
+#include <cmath>
 #include <thread>
 #include <vector>
 #include "ros/ros.h"
@@ -83,6 +84,15 @@ namespace gazebo
 
       // Update Angular velocity
       this->rv = (this->d_rv-this->rv)/0.1*0.001 + this->rv;
+
+      // from body to world frame
+      ignition::math::Pose3d pose;     
+      pose = this->model->WorldPose();
+      double yaw = pose.Yaw();
+      // std::cout << pose << std::endl;
+
+      tmp[0] = this->tv[0]*std::cos(yaw)-this->tv[1]*std::sin(yaw);
+      tmp[1] = this->tv[0]*std::sin(yaw)+this->tv[1]*std::cos(yaw);
 
       // this->vel = (this->d_vel-this->vel)/1.3*0.001 + this->vel;
       this->model->SetLinearVel(ignition::math::Vector3d(tmp[0], tmp[1], tmp[2]));
