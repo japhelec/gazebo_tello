@@ -2,7 +2,7 @@
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
-#include "std_msgs/Float32.h"
+#include "geometry_msgs/Twist.h"
 #include <functional>
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
@@ -42,7 +42,7 @@ namespace gazebo
 
       // Create a named topic, and subscribe to it.
       ros::SubscribeOptions so =
-        ros::SubscribeOptions::create<std_msgs::Float32>(
+        ros::SubscribeOptions::create<geometry_msgs::Twist>(
             "/" + this->model->GetName() + "/vel_cmd",
             1,
             boost::bind(&TelloSim::OnRosMsg, this, _1),
@@ -65,12 +65,13 @@ namespace gazebo
     // Handle an incoming message from ROS
     // \param[in] _msg A float value that is used to set the velocity
     // of the Velodyne.
-    public: void OnRosMsg(const std_msgs::Float32ConstPtr &_msg)
+    public: void OnRosMsg(const geometry_msgs::Twist::ConstPtr &_msg)
     {
-      this->d_vel = 0.017*_msg->data;
+      // this->d_vel = 0.017*_msg->data;
+      std::cout << _msg->linear.x << std::endl;
     }
 
-    /// \brief ROS helper function that processes messages
+    // ROS helper function that processes messages
     private: void QueueThread()
     {
       static const double timeout = 0.01;
