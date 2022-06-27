@@ -1,4 +1,5 @@
 #include <thread>
+#include <vector>
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
@@ -19,8 +20,13 @@ namespace gazebo
       this->model = _parent;
 
       // set initial velocity
-      this->vel = 0;
-      this->d_vel = 0;
+      this->tv[0] = 0;
+      this->tv[1] = 0;
+      this->tv[2] = 0;
+
+      this->d_tv[0] = 0;
+      this->d_tv[1] = 0;
+      this->d_tv[2] = 0;
 
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
@@ -58,17 +64,33 @@ namespace gazebo
     public: void OnUpdate()
     {
       // Apply a small linear velocity to the model.
-      this->vel = (this->d_vel-this->vel)/1.3*0.001 + this->vel;
-      this->model->SetLinearVel(ignition::math::Vector3d(this->vel, 0, 0));
+      double* p_d_tv = this->d_tv;
+      double* p_tv = this->tv;
+      double tmp[3];
+
+      std::transform(p_d_tv,p_d_tv+3,p_tv,tmp,std::minus<double>());
+      tmp[0] = tmp[0]/1.3*0.001;
+      tmp[1] = tmp[1]/1.3*0.001;
+      tmp[2] = tmp[2]/1.3*0.001;
+      std::transform(p_tv,p_tv+3,tmp,tmp,std::plus<double>());
+
+      this->tv[0] = tmp[0];
+      this->tv[1] = tmp[1];
+      this->tv[2] = tmp[2];
+
+      // this->vel = (this->d_vel-this->vel)/1.3*0.001 + this->vel;
+      this->model->SetLinearVel(ignition::math::Vector3d(tmp[0], tmp[1], tmp[2]));
     }
 
     // Handle an incoming message from ROS
-    // \param[in] _msg A float value that is used to set the velocity
+    // \param[in] _msg A double value that is used to set the velocity
     // of the Velodyne.
     public: void OnRosMsg(const geometry_msgs::Twist::ConstPtr &_msg)
     {
       // this->d_vel = 0.017*_msg->data;
-      std::cout << _msg->linear.x << std::endl;
+      this->d_tv[0] = 0.017*_msg->linear.x;
+      this->d_tv[1] = 0.017*_msg->linear.y;
+      this->d_tv[2] = 0.008*_msg->linear.z;
     }
 
     // ROS helper function that processes messages
@@ -90,10 +112,10 @@ namespace gazebo
     private: event::ConnectionPtr updateConnection;
 
     // pointer to the current velocity
-    private: float vel;
+    private: double tv[3];
 
     // pointer to the desired velocity
-    private: float d_vel;
+    private: double d_tv[3];
 
     // A node use for ROS transport
     private: std::unique_ptr<ros::NodeHandle> rosNode;
