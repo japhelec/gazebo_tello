@@ -1,6 +1,6 @@
 #include <cmath>
 #include <thread>
-#include <vector>
+#include <queue>
 #include "ros/ros.h"
 #include "ros/callback_queue.h"
 #include "ros/subscribe_options.h"
@@ -18,19 +18,28 @@ namespace gazebo
     public: void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
     {
       // Store the pointer to the model
+      this->delay_ite = 200;
       this->model = _parent;
 
       // set initial velocity
-      this->tv[0] = 0;
-      this->tv[1] = 0;
-      this->tv[2] = 0;
+      this->tx = 0;
+      this->ty = 0;
+      this->tz = 0;
 
-      this->d_tv[0] = 0;
-      this->d_tv[1] = 0;
-      this->d_tv[2] = 0;
+      this->dtx = 0;
+      this->dty = 0;
+      this->dtz = 0;
 
       this->rv = 0;
-      this->d_rv = 0;
+      this->drv = 0;
+
+      // init queue
+      for (int i=0;i<this->delay_ite;i++) {
+        this->qx.push(0);
+        this->qy.push(0);
+        this->qz.push(0);
+        this->qr.push(0);
+      }
 
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
@@ -67,35 +76,36 @@ namespace gazebo
     // Called by the world update start event
     public: void OnUpdate()
     {
-      // Update Linear velocity
-      double* p_d_tv = this->d_tv;
-      double* p_tv = this->tv;
-      double tmp[3];
+      // update queue (for delay)
+      this->qx.push(this->dtx);
+      this->qy.push(this->dty);
+      this->qz.push(this->dtz);
+      this->qr.push(this->drv);
+      double dtx = this->qx.front();
+      double dty = this->qy.front();
+      double dtz = this->qz.front();
+      double drv = this->qr.front();
+      this->qx.pop();
+      this->qy.pop();
+      this->qz.pop();
+      this->qr.pop();
 
-      std::transform(p_d_tv,p_d_tv+3,p_tv,tmp,std::minus<double>());
-      tmp[0] = tmp[0]/1.3*0.001;
-      tmp[1] = tmp[1]/1.3*0.001;
-      tmp[2] = tmp[2]/1.3*0.001;
-      std::transform(p_tv,p_tv+3,tmp,tmp,std::plus<double>());
+      // Update hover frame velocity
+      this->tx += (dtx-this->tx)/1.3*0.001;
+      this->ty += (dty-this->ty)/1.3*0.001;
+      this->tz += (dtz-this->tz)/0.3*0.001;
+      this->rv += (drv-this->rv)/0.1*0.001;
 
-      this->tv[0] = tmp[0];
-      this->tv[1] = tmp[1];
-      this->tv[2] = tmp[2];
-
-      // Update Angular velocity
-      this->rv = (this->d_rv-this->rv)/0.1*0.001 + this->rv;
-
-      // from body to world frame
+      // World frame velocity
       ignition::math::Pose3d pose;     
       pose = this->model->WorldPose();
       double yaw = pose.Yaw();
-      // std::cout << pose << std::endl;
 
-      tmp[0] = this->tv[0]*std::cos(yaw)-this->tv[1]*std::sin(yaw);
-      tmp[1] = this->tv[0]*std::sin(yaw)+this->tv[1]*std::cos(yaw);
+      double tx = this->tx*std::cos(yaw)-this->ty*std::sin(yaw);
+      double ty = this->tx*std::sin(yaw)+this->ty*std::cos(yaw);
 
-      // this->vel = (this->d_vel-this->vel)/1.3*0.001 + this->vel;
-      this->model->SetLinearVel(ignition::math::Vector3d(tmp[0], tmp[1], tmp[2]));
+      // set velocity
+      this->model->SetLinearVel(ignition::math::Vector3d(tx, ty, this->tz));
       this->model->SetAngularVel(ignition::math::Vector3d(0, 0, this->rv));
     }
 
@@ -104,12 +114,10 @@ namespace gazebo
     // of the Velodyne.
     public: void OnRosMsg(const geometry_msgs::Twist::ConstPtr &_msg)
     {
-      // this->d_vel = 0.017*_msg->data;
-      this->d_tv[0] = 0.017*_msg->linear.x;
-      this->d_tv[1] = 0.017*_msg->linear.y;
-      this->d_tv[2] = 0.008*_msg->linear.z;
-
-      this->d_rv = 0.0143*_msg->angular.z;
+      this->dtx = 0.017*_msg->linear.x;
+      this->dty = 0.017*_msg->linear.y;
+      this->dtz = 0.008*_msg->linear.z;
+      this->drv = 0.0143*_msg->angular.z;
     }
 
     // ROS helper function that processes messages
@@ -122,7 +130,7 @@ namespace gazebo
       }
     }
 
-
+    private: int delay_ite;
 
     // Pointer to the model
     private: physics::ModelPtr model;
@@ -131,16 +139,26 @@ namespace gazebo
     private: event::ConnectionPtr updateConnection;
 
     // pointer to the current velocity
-    private: double tv[3];
+    private: double tx;
+    private: double tz;
+    private: double ty;
 
     // pointer to the desired velocity
-    private: double d_tv[3];
+    private: double dtx;
+    private: double dty;
+    private: double dtz;
 
     // pointer to the current rotational velocity
     private: double rv;
 
     // pointer to the desired rotational velocity
-    private: double d_rv;
+    private: double drv;
+
+    // queue
+    std::queue<double> qx;
+    std::queue<double> qy;
+    std::queue<double> qz;
+    std::queue<double> qr;
 
     // A node use for ROS transport
     private: std::unique_ptr<ros::NodeHandle> rosNode;
