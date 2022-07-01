@@ -20,26 +20,18 @@ namespace gazebo
       // Store the pointer to the model
       this->delay_ite = 200;
       this->model = _parent;
+      this->tello = this->model->GetLink("tello");
 
-      // set initial velocity
-      this->tx = 0;
-      this->ty = 0;
-      this->tz = 0;
+      this->dtv = ignition::math::Vector3d(0,0,0);
+      this->drv = ignition::math::Vector3d(0,0,0);
 
-      this->dtx = 0;
-      this->dty = 0;
-      this->dtz = 0;
-
-      this->rv = 0;
-      this->drv = 0;
-
-      // init queue
-      for (int i=0;i<this->delay_ite;i++) {
-        this->qx.push(0);
-        this->qy.push(0);
-        this->qz.push(0);
-        this->qr.push(0);
-      }
+      // // init queue
+      // for (int i=0;i<this->delay_ite;i++) {
+      //   this->qx.push(0);
+      //   this->qy.push(0);
+      //   this->qz.push(0);
+      //   this->qr.push(0);
+      // }
 
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
@@ -76,37 +68,53 @@ namespace gazebo
     // Called by the world update start event
     public: void OnUpdate()
     {
-      // update queue (for delay)
-      this->qx.push(this->dtx);
-      this->qy.push(this->dty);
-      this->qz.push(this->dtz);
-      this->qr.push(this->drv);
-      double dtx = this->qx.front();
-      double dty = this->qy.front();
-      double dtz = this->qz.front();
-      double drv = this->qr.front();
-      this->qx.pop();
-      this->qy.pop();
-      this->qz.pop();
-      this->qr.pop();
+      // // update queue (for delay)
+      // this->qx.push(this->dtv.x);
+      // this->qy.push(this->dtv.y);
+      // this->qz.push(this->dtv.z);
+      // this->qr.push(this->drv.z);
+
+      // ignition::math::Vector3d<double> dtv = ignition::math::Vector3d(
+      //   this->qx.front(),
+      //   this->qy.front(),
+      //   this->qz.front()
+      // );
+
+      // ignition::math::Vector3d<double> drv = ignition::math::Vector3d(
+      //   0,
+      //   0,
+      //   this->qr.front()
+      // );
+
+      // this->qx.pop();
+      // this->qy.pop();
+      // this->qz.pop();
+      // this->qr.pop();
 
       // Update hover frame velocity
-      this->tx += (dtx-this->tx)/1.3*0.001;
-      this->ty += (dty-this->ty)/1.3*0.001;
-      this->tz += (dtz-this->tz)/0.3*0.001;
-      this->rv += (drv-this->rv)/0.1*0.001;
+      // this->tx += (dtx-this->tx)/1.3*0.001;
+      // this->ty += (dty-this->ty)/1.3*0.001;
+      // this->tz += (dtz-this->tz)/0.3*0.001;
+      // this->rv += (drv-this->rv)/0.1*0.001;
 
-      // World frame velocity
+      // get current hover velocity
       ignition::math::Pose3d pose;     
       pose = this->model->WorldPose();
-      double yaw = pose.Yaw();
+      // double yaw = pose.Yaw();
 
-      double tx = this->tx*std::cos(yaw)-this->ty*std::sin(yaw);
-      double ty = this->tx*std::sin(yaw)+this->ty*std::cos(yaw);
+      ignition::math::Vector3d tv = this->model->WorldLinearVel();
+      tv = pose.Rot().RotateVectorReverse(tv);
+      ignition::math::Vector3d rv = this->model->WorldAngularVel();
+
+      ignition::math::Vector3d tac = (this->dtv - tv)/1.3;
+      tac = tac + ignition::math::Vector3d(0,0,9.8);
+      tac = pose.Rot().RotateVector(tac);
+
+      ignition::math::Vector3d rac = (this->drv - rv)/0.1;
 
       // set velocity
-      this->model->SetLinearVel(ignition::math::Vector3d(tx, ty, this->tz));
-      this->model->SetAngularVel(ignition::math::Vector3d(0, 0, this->rv));
+      this->tello->AddForce(tac);
+      this->tello->AddTorque(rac);
     }
 
     // Handle an incoming message from ROS
@@ -114,10 +122,16 @@ namespace gazebo
     // of the Velodyne.
     public: void OnRosMsg(const geometry_msgs::Twist::ConstPtr &_msg)
     {
-      this->dtx = 0.017*_msg->linear.x;
-      this->dty = 0.017*_msg->linear.y;
-      this->dtz = 0.008*_msg->linear.z;
-      this->drv = 0.0143*_msg->angular.z;
+      this->dtv = ignition::math::Vector3d(
+        0.017*_msg->linear.x,
+        0.017*_msg->linear.y,
+        0.008*_msg->linear.z
+      );
+      this->drv = ignition::math::Vector3d(
+        0,
+        0,
+        0.0143*_msg->angular.z
+      );
     }
 
     // ROS helper function that processes messages
@@ -134,31 +148,20 @@ namespace gazebo
 
     // Pointer to the model
     private: physics::ModelPtr model;
+    private: physics::LinkPtr tello;
 
     // Pointer to the update event connection
     private: event::ConnectionPtr updateConnection;
 
-    // pointer to the current velocity
-    private: double tx;
-    private: double tz;
-    private: double ty;
-
     // pointer to the desired velocity
-    private: double dtx;
-    private: double dty;
-    private: double dtz;
+    private: ignition::math::Vector3d dtv;
+    private: ignition::math::Vector3d drv;
 
-    // pointer to the current rotational velocity
-    private: double rv;
-
-    // pointer to the desired rotational velocity
-    private: double drv;
-
-    // queue
-    std::queue<double> qx;
-    std::queue<double> qy;
-    std::queue<double> qz;
-    std::queue<double> qr;
+    // // queue
+    // std::queue<double> qx;
+    // std::queue<double> qy;
+    // std::queue<double> qz;
+    // std::queue<double> qr;
 
     // A node use for ROS transport
     private: std::unique_ptr<ros::NodeHandle> rosNode;

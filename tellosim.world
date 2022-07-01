@@ -12,9 +12,8 @@
     </include>
 
     <model name="TelloSim">
-      <gravity>0</gravity>
       <pose>0 0 0.5 0 0 0</pose>
-      <link name="link">
+      <link name="tello">
         <collision name="collision">
           <geometry>
             <box>
