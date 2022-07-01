@@ -12,9 +12,10 @@ namespace gazebo
     {
       // Store the pointer to the model
       this->model = _parent;
+      this->link = this->model->GetLink("link");
       
-      this->yaw = 0;
-      this->vel = 0;
+      // this->yaw = 0;
+      // this->vel = 0;
 
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
@@ -29,10 +30,13 @@ namespace gazebo
 
       // // Apply a small linear velocity to the model.
       // this->vel = (1.7-this->vel)/1.3*0.001 + this->vel;
+      
       // this->model->SetLinearVel(ignition::math::Vector3d(this->vel, 0, 0));
+      this->link->AddForce(ignition::math::Vector3d(1, 0, 0));
 
-      // ignition::math::Pose3d pose;     
-      // pose = this->model->WorldPose();
+      ignition::math::Pose3d pose;     
+      pose = this->model->WorldPose();
+      this->model->SetWorldPose(pose);
       // double x = pose.X();
       // double y = pose.Y();
       // double z = pose.Z();
@@ -41,12 +45,13 @@ namespace gazebo
 
     // Pointer to the model
     private: physics::ModelPtr model;
+    private: physics::LinkPtr link;
 
     // Pointer to the update event connection
     private: event::ConnectionPtr updateConnection;
 
-    private: float vel;
-    private: double yaw;
+    // private: float vel;
+    // private: double yaw;
   };
 
   // Register this plugin with the simulator
