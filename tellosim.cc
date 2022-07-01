@@ -91,35 +91,37 @@ namespace gazebo
       // this->qz.pop();
       // this->qr.pop();
 
-      // Update hover frame velocity
-      // this->tx += (dtx-this->tx)/1.3*0.001;
-      // this->ty += (dty-this->ty)/1.3*0.001;
-      // this->tz += (dtz-this->tz)/0.3*0.001;
-      // this->rv += (drv-this->rv)/0.1*0.001;
+      // 1. Yaw between {I} & {B}
+      ignition::math::Pose3d cPose;     
+      cPose = this->model->WorldPose();
+      double yaw = cPose.Yaw();
+      ignition::math::Quaternion<double> tf = ignition::math::Quaternion<double>(0,0,yaw);
 
-      // get current hover velocity
-      ignition::math::Pose3d pose;     
-      pose = this->model->WorldPose();
-      // double yaw = pose.Yaw();
-
+      // 2. Acceleration in {H}
       ignition::math::Vector3d tv = this->model->WorldLinearVel();
-      tv = pose.Rot().RotateVectorReverse(tv);
+      tv = tf.RotateVectorReverse(tv);
       ignition::math::Vector3d rv = this->model->WorldAngularVel();
 
       ignition::math::Vector3d tac = (this->dtv - tv)/1.3;
       tac = tac + ignition::math::Vector3d(0,0,9.8);
-      tac = pose.Rot().RotateVector(tac);
-
       ignition::math::Vector3d rac = (this->drv - rv)/0.1;
 
-      // set velocity
+
+      // 3. tilt orientation
+      double theta = std::atan(tac.X()/tac.Z());
+      double phi = std::atan(-tac.Y()/tac.Z()*std::cos(theta));
+
+      ignition::math::Pose3d dPose = ignition::math::Pose3d(cPose.Pos(),ignition::math::Quaternion<double>(phi,theta,yaw));
+      this->model->SetWorldPose(dPose);
+
+
+      // 4. Apply force and torque
+      tac = tf.RotateVector(tac);  // {H} -> {I}
+
       this->tello->AddForce(tac);
       this->tello->AddTorque(rac);
     }
 
-    // Handle an incoming message from ROS
-    // \param[in] _msg A double value that is used to set the velocity
-    // of the Velodyne.
     public: void OnRosMsg(const geometry_msgs::Twist::ConstPtr &_msg)
     {
       this->dtv = ignition::math::Vector3d(
