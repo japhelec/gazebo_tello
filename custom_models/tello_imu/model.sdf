@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="tello_imu">
-    <link name="link">
+    <link name="tello_imu">
       <inertial>
-        <mass>0.0001</mass>
+        <mass>0.001</mass>
       </inertial>
       <collision name="collision">
         <geometry>
