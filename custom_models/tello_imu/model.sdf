@@ -1,22 +1,21 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="tello_imu">
-    <pose>0 0 0.036 0 0 0</pose>
     <link name="link">
       <inertial>
-        <mass>0.1</mass>
+        <mass>0.0001</mass>
       </inertial>
       <collision name="collision">
         <geometry>
           <box>
-            <size>0.073000 0.276000 0.072000</size>
+            <size>0.005 0.005 0.005</size>
           </box>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
           <box>
-            <size>0.073000 0.276000 0.072000</size>
+            <size>0.005 0.005 0.005</size>
           </box>
         </geometry>
       </visual>

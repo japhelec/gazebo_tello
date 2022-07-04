@@ -1,23 +1,22 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="tello_camera">
-    <pose>0 0 0.036 0 0 0</pose>
     <link name="link">
       <inertial>
-        <mass>0.1</mass>
+        <mass>0.001</mass>
       </inertial>
       <collision name="collision">
         <geometry>
           <box>
-            <size>0.073000 0.276000 0.072000</size>
+            <size>0.01 0.01 0.01</size>
           </box>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
-          <mesh>
-            <uri>model://kinect/meshes/kinect.dae</uri>
-          </mesh>
+          <box>
+            <size>0.01 0.01 0.01</size>
+          </box>
         </geometry>
       </visual>
       <sensor name='camera' type='camera'>
