@@ -19,8 +19,10 @@ namespace gazebo
     {
       // Store the pointer to the model
       this->delay_ite = 200;
+      this->mass = 1;
+
       this->model = _parent;
-      this->tello = this->model->GetLink("tello");
+      this->tello = this->model->GetLink("tello_body");
 
       this->dtv = ignition::math::Vector3d(0,0,0);
       this->drv = ignition::math::Vector3d(0,0,0);
@@ -116,7 +118,7 @@ namespace gazebo
 
 
       // 4. Apply force and torque
-      tac = tf.RotateVector(tac);  // {H} -> {I}
+      tac = tf.RotateVector(tac)*this->mass;  // {H} -> {I}
 
       this->tello->AddForce(tac);
       this->tello->AddTorque(rac);
@@ -147,6 +149,7 @@ namespace gazebo
     }
 
     private: int delay_ite;
+    private: double mass;
 
     // Pointer to the model
     private: physics::ModelPtr model;
