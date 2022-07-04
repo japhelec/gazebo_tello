@@ -1,8 +1,7 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
   <model name="tello_body">
-    <plugin name="tellosim" filename="libtellosim.so"/>
-    <link name="link">
+    <link name="tello_body">
       <!-- <pose>0 0 0 0 0 0</pose> -->
       <inertial>
         <!-- <pose>0.05 0.05 0 0 0 0</pose> -->
@@ -33,5 +32,6 @@
         </geometry>
       </visual>
     </link>
+    <plugin name="tellosim" filename="libtellosim.so"/>
   </model>
 </sdf>
