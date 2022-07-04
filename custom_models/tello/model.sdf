@@ -37,18 +37,18 @@
         <inertial>
           <mass>0.001</mass>
           <inertia>
-            <ixx>0.0000000001</ixx>
+            <ixx>1e-10</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>0.0000000001</iyy>
+            <iyy>1e-10</iyy>
             <iyz>0</iyz>
-            <izz>0.0000000001</izz>
+            <izz>1e-10</izz>
           </inertia>
         </inertial>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.01 0.01 0.01</size>
+              <size>0.001 0.001 0.001</size>
             </box>
           </geometry>
         </collision>
@@ -107,32 +107,32 @@
           </plugin>
         </sensor>
       </link>
-      <pose>0 0.032 0 0 -0 1.5707</pose>
+      <pose>0 0.032 0.0062 0 -0 1.57</pose>
     </model>
     <model name='tello_imu'>
       <link name='tello_imu'>
         <inertial>
           <mass>0.001</mass>
           <inertia>
-            <ixx>0.0000000001</ixx>
+            <ixx>1e-10</ixx>
             <ixy>0</ixy>
             <ixz>0</ixz>
-            <iyy>0.0000000001</iyy>
+            <iyy>1e-10</iyy>
             <iyz>0</iyz>
-            <izz>0.0000000001</izz>
+            <izz>1e-10</izz>
           </inertia>
         </inertial>
         <collision name='collision'>
           <geometry>
             <box>
-              <size>0.005 0.005 0.005</size>
+              <size>0.001 0.001 0.001</size>
             </box>
           </geometry>
         </collision>
         <visual name='visual'>
           <geometry>
             <box>
-              <size>0.005 0.005 0.005</size>
+              <size>0.001 0.001 0.001</size>
             </box>
           </geometry>
         </visual>
@@ -155,25 +155,8 @@
           <imu/>
         </sensor>
       </link>
-      <pose>0 0 0 0 -0 0</pose>
+      <pose>0 0 0.0062 0 -0 0</pose>
     </model>
-    <joint name='tello_body_JOINT_1' type='fixed'>
-      <parent>tello_body::tello_body</parent>
-      <child>tello_imu::tello_imu</child>
-      <pose>0 0 0 0 -0 0</pose>
-      <physics>
-        <ode>
-          <limit>
-            <cfm>0</cfm>
-            <erp>0.2</erp>
-          </limit>
-          <suspension>
-            <cfm>0</cfm>
-            <erp>0.2</erp>
-          </suspension>
-        </ode>
-      </physics>
-    </joint>
     <joint name='tello_body_JOINT_0' type='fixed'>
       <parent>tello_body::tello_body</parent>
       <child>tello_camera::link</child>
@@ -191,8 +174,24 @@
         </ode>
       </physics>
     </joint>
+    <joint name='tello_body_JOINT_1' type='fixed'>
+      <parent>tello_body::tello_body</parent>
+      <child>tello_imu::tello_imu</child>
+      <pose>0 0 0 0 -0 0</pose>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>
-    <pose>0 -0 0 0 -0 0</pose>
   </model>
 </sdf>
