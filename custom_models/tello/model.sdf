@@ -47,16 +47,18 @@
         </inertial>
         <collision name='collision'>
           <geometry>
-            <box>
-              <size>0.001 0.001 0.001</size>
-            </box>
+            <mesh>
+              <uri>model://tello_camera/meshes/model.dae</uri>
+              <scale>0.3 0.3 0.3</scale>
+            </mesh>
           </geometry>
         </collision>
         <visual name='visual'>
           <geometry>
-            <box>
-              <size>0.01 0.01 0.01</size>
-            </box>
+            <mesh>
+              <uri>model://tello_camera/meshes/model.dae</uri>
+              <scale>0.3 0.3 0.3</scale>
+            </mesh>
           </geometry>
         </visual>
         <sensor name='camera' type='camera'>
@@ -107,7 +109,7 @@
           </plugin>
         </sensor>
       </link>
-      <pose>0 0.032 0.0062 0 -0 1.57</pose>
+      <pose>0 0.021 0.0062 0 -0 1.57</pose>
     </model>
     <model name='tello_imu'>
       <link name='tello_imu'>

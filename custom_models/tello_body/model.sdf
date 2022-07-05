@@ -20,6 +20,7 @@
         <geometry>
           <mesh>
             <uri>model://tello_body/meshes/center.dae</uri>
+            <scale>0.7915 0.7915 0.7915</scale>
           </mesh>
         </geometry>
       </collision>
@@ -28,6 +29,7 @@
         <geometry>
           <mesh>
             <uri>model://tello_body/meshes/center.dae</uri>
+            <scale>0.7915 0.7915 0.7915</scale>
           </mesh>
         </geometry>
       </visual>
