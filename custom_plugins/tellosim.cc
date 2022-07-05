@@ -56,7 +56,7 @@ namespace gazebo
       // Create a named topic, and subscribe to it.
       ros::SubscribeOptions so =
         ros::SubscribeOptions::create<geometry_msgs::Twist>(
-            "/" + this->model->GetName() + "/vel_cmd",
+            "/tello/vel_cmd",
             1,
             boost::bind(&TelloSim::OnRosMsg, this, _1),
             ros::VoidPtr(), &this->rosQueue);
