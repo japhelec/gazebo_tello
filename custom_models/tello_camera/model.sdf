@@ -33,8 +33,8 @@
         <camera name='__default__'>
           <horizontal_fov>1.047</horizontal_fov>
           <image>
-            <width>320</width>
-            <height>240</height>
+            <width>960</width>
+            <height>720</height>
           </image>
           <clip>
             <near>0.1</near>
@@ -62,7 +62,7 @@
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <updateRate>30.0</updateRate>
-          <cameraName>usb_cam</cameraName>
+          <cameraName>camera</cameraName>
           <frameName>/robot_camera_link</frameName>
           <CxPrime>320.5</CxPrime>
           <Cx>320.5</Cx>
