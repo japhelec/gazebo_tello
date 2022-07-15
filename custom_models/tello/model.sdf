@@ -4,7 +4,7 @@
     <model name='tello_body'>
       <link name='tello_body'>
         <inertial>
-          <mass>0.998</mass>
+          <mass>0.999</mass>
           <inertia>
             <ixx>1</ixx>
             <ixy>0</ixy>
@@ -32,7 +32,7 @@
       <plugin name='tellosim' filename='libtellosim.so'/>
       <pose>0 0 0 0 -0 0</pose>
     </model>
-    <model name='tello_camera'>
+    <!-- <model name='tello_camera'>
       <link name='link'>
         <inertial>
           <mass>0.001</mass>
@@ -84,9 +84,12 @@
               <cutoff_angle>3.1415</cutoff_angle>
               <env_texture_size>1080</env_texture_size>
             </lens>
+            <save enabled="true">
+              <path>/tmp/camera_save_tutorial</path>
+            </save>
           </camera>
           <always_on>1</always_on>
-          <update_rate>30</update_rate>
+          <update_rate>15</update_rate>
           <visualize>1</visualize>
           <plugin name='camera_plugin' filename='libgazebo_ros_camera.so'>
             <robotNamespace/>
@@ -94,7 +97,7 @@
             <imageTopicName>image_raw</imageTopicName>
             <cameraInfoTopicName>camera_info</cameraInfoTopicName>
             <updateRate>30.0</updateRate>
-            <cameraName>usb_cam</cameraName>
+            <cameraName>camera</cameraName>
             <frameName>/robot_camera_link</frameName>
             <CxPrime>320.5</CxPrime>
             <Cx>320.5</Cx>
@@ -110,7 +113,7 @@
         </sensor>
       </link>
       <pose>0 0.021 0.0062 0 -0 1.57</pose>
-    </model>
+    </model> -->
     <model name='tello_imu'>
       <link name='tello_imu'>
         <inertial>
@@ -159,7 +162,7 @@
       </link>
       <pose>0 0 0.0062 0 -0 0</pose>
     </model>
-    <joint name='tello_body_JOINT_0' type='fixed'>
+    <!-- <joint name='tello_body_JOINT_0' type='fixed'>
       <parent>tello_body::tello_body</parent>
       <child>tello_camera::link</child>
       <pose>0 0 0 0 -0 0</pose>
@@ -175,7 +178,7 @@
           </suspension>
         </ode>
       </physics>
-    </joint>
+    </joint> -->
     <joint name='tello_body_JOINT_1' type='fixed'>
       <parent>tello_body::tello_body</parent>
       <child>tello_imu::tello_imu</child>
